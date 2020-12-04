@@ -1,0 +1,61 @@
+---
+title: "Plot Data"
+author: "Ijeamaka Anyene"
+date: "12/1/2020"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+generate_plot = function(df, palette, variable, variable_y, label){
+  plot = df %>%
+    ggplot() + 
+    geom_point(
+      aes(
+        x = {{variable}},
+        y = {{variable_y}},
+        color  = hex), 
+    shape = 15) +
+    geom_segment(
+      aes(
+        x = 0, 
+        xend = 100,
+        y = 0,
+        yend = 0
+      ),
+      lineend = "round", 
+      linejoin = "mitre",
+      arrow = arrow(length = unit(0.1,"cm"))
+    ) +
+    labs(
+      x = label
+      ) +
+    scale_color_manual(
+      values = {{palette}}
+      ) +
+    theme(
+      legend.position = "none",
+      axis.text = element_blank(),
+      axis.title.y = element_blank(),
+      axis.title.x = element_text(family = "Roboto Condensed"),
+      axis.ticks = element_blank(),
+      plot.background = element_rect(fill = "#f9f9f9"),
+      panel.background = element_rect(fill = "#f9f9f9"),
+      panel.grid = element_blank()
+    ) 
+  
+  return(plot)
+}
+```
+
+```{r}
+brightness = generate_plot(shades_values, 
+                           shade_palette,
+                           V, 
+                           V_Y,
+                           label = "Increasing Brightness / Intensity")
+brightness
+```

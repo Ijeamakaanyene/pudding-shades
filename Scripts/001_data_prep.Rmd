@@ -1,0 +1,209 @@
+---
+title: "Data Prep"
+author: "Ijeamaka Anyene"
+date: "12/1/2020"
+output: html_document
+---
+
+```{r}
+```
+
+```{r}
+library(dplyr)
+library(glue)
+```
+
+```{r}
+pudding_shades_data = readr::read_csv(url('https://raw.githubusercontent.com/the-pudding/data/master/makeup-shades/shades.csv'))
+```
+
+H = hue (360 degrees color wheel)
+S = saturation (amount of grey)
+V = value (brightness'/intensity value)
+L = lightness value
+```{r}
+shade_palette = pudding_shades_data %>%
+  mutate(shades = paste0("#", hex)) %>%
+  select(hex, shades) %>%
+  tibble::deframe()
+```
+
+```{r}
+shades_values = pudding_shades_data %>%
+  filter(
+    is.na(H) == FALSE
+    ) %>%
+  mutate(
+    S = S * 100,
+    V = V * 100
+    ) %>%
+  rename(
+    hue = H,
+    saturation = S,
+    brightness = V,
+    lightness = L
+  ) %>%
+  group_by(lightness) %>%
+  mutate(
+    lightness_y = seq(1:n())
+    ) %>%
+  group_by(hue) %>%
+  mutate(
+    hue_y = seq(1:n())
+    ) %>%
+  group_by(saturation) %>%
+  mutate(
+    saturation_y = seq(1:n())
+    ) %>%
+  group_by(brightness) %>%
+  mutate(
+    brightness_y = seq(1:n())
+    ) %>%
+  mutate(
+    label = glue("Brand: {brand}
+                 Product: {product}")
+  )
+```
+
+```{r}
+readr::write_rds(shades_values, 
+                 here::here("Data", "shades_values.rds"))
+
+readr::write_rds(shade_palette,
+                 here::here("Data", "shade_palette.rds"))
+```
+
+```{r}
+brightness =
+  ggplot(data = grouped_values) +
+  geom_point(aes(x = V, 
+                 y = V_Y,
+                 color = hex),
+             shape = 15
+             ) +
+  geom_segment(aes(x = 0, xend = 100,
+                   y = 0, yend = 0),
+               lineend = "round", 
+               linejoin = "mitre",
+               arrow = arrow(length = unit(0.1,"cm"))
+               ) +
+  labs(x = "Increasing Brightness / Intensity") +
+  scale_color_manual(
+    values = shades
+  ) +
+  theme(
+    legend.position = "none",
+    axis.text = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(family = "Roboto Condensed"),
+    axis.ticks = element_blank(),
+    plot.background = element_rect(fill = "#f9f9f9"),
+    panel.background = element_rect(fill = "#f9f9f9"),
+    panel.grid = element_blank()
+    ) 
+  
+
+brightness
+```
+
+```{r}
+plot_ly(grouped_values,
+        text = )
+
+```
+
+```{r}
+saturation =
+  ggplot(data = grouped_values) +
+  geom_point(aes(x = S, 
+                 y = S_Y,
+                 color = hex),
+             shape = 15
+             ) +
+  geom_segment(aes(x = 0, xend = 100,
+                   y = 0, yend = 0),
+               lineend = "round", 
+               linejoin = "mitre",
+               arrow = arrow(length = unit(0.1,"cm"))
+               ) +
+  labs(x = "Increasing Saturation") +
+  scale_color_manual(
+    values = shades
+  ) +
+  theme(
+    legend.position = "none",
+    axis.text = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(family = "Roboto Condensed"),
+    axis.ticks = element_blank(),
+    plot.background = element_rect(fill = "#f9f9f9"),
+    panel.background = element_rect(fill = "#f9f9f9"),
+    panel.grid = element_blank()
+    ) 
+
+saturation
+```
+
+```{r}
+lightness = 
+  ggplot(data = grouped_values) +
+  geom_point(aes(x = L, 
+                 y = L_Y,
+                 color = hex),
+             shape = 15
+             ) +
+  geom_segment(aes(x = 0, xend = 100,
+                   y = 0, yend = 0),
+               lineend = "round", 
+               linejoin = "mitre",
+               arrow = arrow(length = unit(0.1,"cm"))
+               ) +
+  labs(x = "Increasing Lightness") +
+  scale_color_manual(
+    values = shades
+  ) +
+  theme(
+    legend.position = "none",
+    axis.text = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(family = "Roboto Condensed"),
+    axis.ticks = element_blank(),
+    plot.background = element_rect(fill = "#f9f9f9"),
+    panel.background = element_rect(fill = "#f9f9f9"),
+    panel.grid = element_blank()
+    ) 
+
+lightness
+```
+
+```{r}
+hue = 
+  ggplot(data = grouped_values) +
+  geom_point(aes(x = H, 
+                 y = H_Y,
+                 color = hex),
+             shape = 15
+             ) +
+  geom_segment(aes(x = 0, xend = 100,
+                   y = 0, yend = 0),
+               lineend = "round", 
+               linejoin = "mitre",
+               arrow = arrow(length = unit(0.1,"cm"))
+               ) +
+  labs(x = "Increasing Hue") +
+  scale_color_manual(
+    values = shades
+  ) +
+  theme(
+    legend.position = "none",
+    axis.text = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(family = "Roboto Condensed"),
+    axis.ticks = element_blank(),
+    plot.background = element_rect(fill = "#f9f9f9"),
+    panel.background = element_rect(fill = "#f9f9f9"),
+    panel.grid = element_blank()
+    ) 
+
+hue
+```
