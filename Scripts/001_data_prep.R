@@ -1,7 +1,7 @@
 library(dplyr)
 library(glue)
 
-
+# Cleaning Shades Data
 pudding_shades_data = readr::read_csv(url('https://raw.githubusercontent.com/the-pudding/data/master/makeup-shades/shades.csv'))
 
 
@@ -21,7 +21,6 @@ shade_values = pudding_shades_data %>%
          Lightness = L) %>%
   mutate(label = glue("Brand: {brand}
                  Product: {product}"))
-
 
 readr::write_rds(shade_values, 
                  here::here("Data", "shade_values.rds"))
