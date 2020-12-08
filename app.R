@@ -1,15 +1,17 @@
+
+# Required libraries
 library(shiny)
 library(ggplot2)
 library(dplyr)
+
+# Helper files
+source(here::here("Scripts", "002_create_plots.R"))
 
 # Data
 shades_values = readr::read_rds(here::here("Data",
                                            "shade_values.rds"))
 shade_palette = readr::read_rds(here::here("Data",
                                            "shade_palette.rds"))
-
-# Reading in functions
-source(here::here("Scripts", "002_create_plots.R"))
 
 
 # Shiny App UI
@@ -35,7 +37,7 @@ ui = fluidPage(
                   choices = colnames(shades_values)[6:9],
                   selected = colnames(shades_values)[6]),
       
-      actionButton("show", "Generate Information")
+      htmlOutput("info_plot_click")
       
     ),
     
@@ -49,6 +51,7 @@ ui = fluidPage(
       # tabset panel showing information about color 
       tabsetPanel(id = "info_tabs",
                   type = "tabs",
+                  # Static background tab
                   tabPanel("Background", 
                            includeHTML(here::here("Text", "background_text.html"))),
                   
@@ -64,11 +67,7 @@ ui = fluidPage(
                            includeHTML(here::here("Text", "brightness.html"))),
                   tabPanel(title = "Lightness Information",
                            value = 4,
-                           includeHTML(here::here("Text", "lightness.html"))),
-                  
-                  # Static Tabs
-                  tabPanel("Summary", textOutput("summary")),
-                  tabPanel("Shade Information", textOutput("click_info")))
+                           includeHTML(here::here("Text", "lightness.html"))))
     )
   )
 )
@@ -94,9 +93,8 @@ server <- function(input, output, session) {
   
   
   
-  # Dynamically show tab
-  observeEvent(input$show, {
-    
+  # Dynamically show tab based on selection
+  observeEvent(input$shade_type, {
     
     if(input$shade_type == "Hue"){
       showTab(inputId = "info_tabs", target = "1")
@@ -118,13 +116,51 @@ server <- function(input, output, session) {
       hideTab(inputId = "info_tabs", target = "2")
       hideTab(inputId = "info_tabs", target = "4")  
       
-    } else {
+    } else if(input$shade_type == "Lightness"){
       showTab(inputId = "info_tabs", target = "4")
       hideTab(inputId = "info_tabs", target = "1")
-      hideTab(inputId = "info_tabs", target = "3")
-      hideTab(inputId = "info_tabs", target = "4")  
+      hideTab(inputId = "info_tabs", target = "2")
+      hideTab(inputId = "info_tabs", target = "3")  
       
     }
+    
+    
+  })
+  
+  # Shade information for each click
+  output$info_plot_click = renderPrint({
+    
+    shade_info_str = function(clicked_df){
+      
+      details = if(nrow(clicked_df) == 0){
+        p(tags$b("Brand: "), br(),
+          tags$b("Product: "), br(),
+          tags$b("Hexadecimal: "), br(),
+          tags$b("Hue: "), br(),
+          tags$b("Saturation: "), br(),
+          tags$b("Brightness: "), br(),
+          tags$b("Lightness: ")) }
+      else if(nrow(clicked_df) >= 1){
+        p(tags$b("Brand: "), tags$em(clicked_df$brand), br(),
+          tags$b("Product: "), tags$em(clicked_df$product), br(),
+          tags$b("Hexadecimal: "), tags$em(clicked_df$hex), br(),
+          tags$b("Hue: "), tags$em(clicked_df$Hue), br(),
+          tags$b("Saturation: "), tags$em(clicked_df$Saturation), br(),
+          tags$b("Brightness: "), tags$em(clicked_df$Brightness), br(),
+          tags$b("Lightness: "), tags$em(clicked_df$Lightness))
+      }
+      else { NA }
+      return(details)
+    }
+    
+  shade_info_str(nearPoints(plot_data(),
+                            coordinfo = input$plot_click,
+                            threshold = 2,
+                            addDist = T) %>%
+                   arrange(dist_) %>%
+                   slice(1) %>%
+                 select(brand, product, hex, Hue,
+                        Saturation, Brightness, Lightness))
     
     
   })
@@ -143,14 +179,6 @@ server <- function(input, output, session) {
     nrow(plot_data())
   })
   
-  
-  output$summary = renderText({
-    
-    paste0("For ", input$brand_name, " the ", stringr::str_to_lower(input$shade_type), " value ranges from ",
-           min_max_val()[[1]], " to ", min_max_val()[[2]], " which covers ", perc_coverage(), 
-           "% of the ", stringr::str_to_lower(input$shade_type), " spectrum.\n",
-           number_shades(), " shades are represented for the brand(s).")
-  })
 
     
 } 
