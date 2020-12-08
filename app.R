@@ -3,6 +3,7 @@
 library(shiny)
 library(ggplot2)
 library(dplyr)
+library(shinythemes)
 
 # Helper files
 source(here::here("Scripts", "002_create_plots.R"))
@@ -16,16 +17,16 @@ shade_palette = readr::read_rds(here::here("Data",
 
 # Shiny App UI
 ui = fluidPage(
-
+  theme = shinytheme("yeti"),
   
   # Title
   titlePanel(
-    title = h1("What's in a shade? An exploration of the color composition of foundation shades",
+    title = h1("What's in a shade? An exploration of the color components of foundation shades",
                align = "center"),
     windowTitle = "Whats in a shade?"),
   
+  # Plot
   fluidRow(
-    
     column(12,
            align = 'center',
            wellPanel(
@@ -37,8 +38,8 @@ ui = fluidPage(
         )
   ),
   
+  # Inputs 
   fluidRow(
-    
     column(4,
            wellPanel(
              selectInput("brand_name",
@@ -46,12 +47,13 @@ ui = fluidPage(
                          choices = c("all brands", sort(unique(shades_values$brand)))),
              
              selectInput("shade_type",
-                         label = "Shade Color Composition", 
+                         label = "Shade Color Component", 
                          choices = colnames(shades_values)[6:9],
                          selected = colnames(shades_values)[6])
            )
         ),
     
+    # Summary information
     column(8,
            wellPanel(
              tabsetPanel(id = "info_tabs",
@@ -61,23 +63,39 @@ ui = fluidPage(
                                   includeHTML(here::here("Text", "background_text.html"))),
                          
                          # tabs to dynamically appear
-                         tabPanel(title = "Hue Information",
+                         tabPanel(title = "Component: Hue",
                                   value = 1,
                                   includeHTML(here::here("Text", "hue.html"))),
-                         tabPanel(title = "Saturation Information",
+                         tabPanel(title = "Component: Saturation",
                                   value = 2,
                                   includeHTML(here::here("Text", "saturation.html"))),
-                         tabPanel(title = "Brightness Information",
+                         tabPanel(title = "Component: Brightness",
                                   value = 3,
                                   includeHTML(here::here("Text", "brightness.html"))),
-                         tabPanel(title = "Lightness Information",
+                         tabPanel(title = "Component: Lightness",
                                   value = 4,
                                   includeHTML(here::here("Text", "lightness.html"))),
+                         
+                         # Tab updates based on click
                          tabPanel(title = "Foundation Shade",
                                   value = 5,
-                                  htmlOutput("info_plot_click")))
+                                  htmlOutput("info_plot_click")),
+                         # Static tab
+                         tabPanel(title = "Credit",
+                                  includeHTML(here::here("Text", "about.html"))))
            )
-          )
+        )
+  ),
+  
+  
+  # Footer / Credits
+  hr(),
+  fluidRow(
+    column(8,
+           p("Shiny App Created by ", tags$a(href = "https://ijeamaka-anyene.netlify.app/", "Ijeamaka Anyene")),
+           p("Created December 2020 / Last Updated December 2020"),
+           p("Code can be found on ", tags$a(href = "https://github.com/Ijeamakaanyene/pudding-shades", "GitHub")),
+           p("Data from ", tags$a(href = "https://pudding.cool/", "The Pudding")))
   )
 )
   
@@ -174,23 +192,7 @@ server <- function(input, output, session) {
     
     
   })
-  
-  
-  # Creating summary below
-  min_max_val = reactive({
-    create_summary_keys(plot_data(), input$shade_type)
-  })
-  
-  perc_coverage = reactive({
-    (min_max_val()[[2]] - min_max_val()[[1]])
-  })
-  
-  number_shades = reactive({
-    nrow(plot_data())
-  })
-  
 
-    
 } 
   
 
