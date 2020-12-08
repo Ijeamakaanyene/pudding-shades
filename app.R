@@ -22,7 +22,7 @@ ui = fluidPage(
   # Title
   titlePanel(
     title = h1("What's in a shade? An exploration of the color components of foundation shades",
-               align = "center"),
+               align = "center"), 
     windowTitle = "Whats in a shade?"),
   
   # Plot
@@ -49,7 +49,10 @@ ui = fluidPage(
              selectInput("shade_type",
                          label = "Shade Color Component", 
                          choices = colnames(shades_values)[6:9],
-                         selected = colnames(shades_values)[6])
+                         selected = colnames(shades_values)[6]),
+             
+             p("Click on a square and check out foundation shade tab for more information",
+               style = "font-size: 70%;font-style: italic")
            )
         ),
     
@@ -92,10 +95,14 @@ ui = fluidPage(
   hr(),
   fluidRow(
     column(8,
-           p("Shiny App Created by ", tags$a(href = "https://ijeamaka-anyene.netlify.app/", "Ijeamaka Anyene")),
-           p("Created December 2020 / Last Updated December 2020"),
-           p("Code can be found on ", tags$a(href = "https://github.com/Ijeamakaanyene/pudding-shades", "GitHub")),
-           p("Data from ", tags$a(href = "https://pudding.cool/", "The Pudding")))
+           p("Shiny App Created by ", tags$a(href = "https://ijeamaka-anyene.netlify.app/", "Ijeamaka Anyene"),
+             style = "font-size: 70%;font-style: italic"),
+           p("Created December 2020 / Last Updated December 2020",
+             style = "font-size: 70%;font-style: italic"),
+           p("Code can be found on ", tags$a(href = "https://github.com/Ijeamakaanyene/pudding-shades", "GitHub"),
+             style = "font-size: 70%;font-style: italic"),
+           p("Data from ", tags$a(href = "https://pudding.cool/", "The Pudding"),
+             style = "font-size: 70%;font-style: italic"))
   )
 )
   
