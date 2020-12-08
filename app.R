@@ -16,6 +16,7 @@ shade_palette = readr::read_rds(here::here("Data",
 
 # Shiny App UI
 ui = fluidPage(
+
   
   # Title
   titlePanel(
@@ -23,54 +24,63 @@ ui = fluidPage(
                align = "center"),
     windowTitle = "Whats in a shade?"),
   
-  # Sidebar of inputs
-  sidebarLayout(
+  fluidRow(
     
-    sidebarPanel(
-      
-      selectInput("brand_name",
-                  label = "Brand Name",
-                  choices = c("all brands", sort(unique(shades_values$brand)))),
-      
-      selectInput("shade_type",
-                  label = "Shade Color Composition", 
-                  choices = colnames(shades_values)[6:9],
-                  selected = colnames(shades_values)[6]),
-      
-      htmlOutput("info_plot_click")
-      
-    ),
+    column(12,
+           align = 'center',
+           wellPanel(
+             plotOutput("plot", 
+                        width = "800px",
+                        click = "plot_click"),
+             br()
+           )
+        )
+  ),
+  
+  fluidRow(
     
-    # Main panel of plots and information
-    mainPanel(
-      plotOutput("plot", 
-                 width = "800px",
-                 click = "plot_click"),
-      br(),
-      
-      # tabset panel showing information about color 
-      tabsetPanel(id = "info_tabs",
-                  type = "tabs",
-                  # Static background tab
-                  tabPanel("Background", 
-                           includeHTML(here::here("Text", "background_text.html"))),
-                  
-                  # tabs to dynamically appear
-                  tabPanel(title = "Hue Information",
-                           value = 1,
-                           includeHTML(here::here("Text", "hue.html"))),
-                  tabPanel(title = "Saturation Information",
-                           value = 2,
-                           includeHTML(here::here("Text", "saturation.html"))),
-                  tabPanel(title = "Brightness Information",
-                           value = 3,
-                           includeHTML(here::here("Text", "brightness.html"))),
-                  tabPanel(title = "Lightness Information",
-                           value = 4,
-                           includeHTML(here::here("Text", "lightness.html"))))
-    )
+    column(4,
+           wellPanel(
+             selectInput("brand_name",
+                         label = "Brand Name",
+                         choices = c("all brands", sort(unique(shades_values$brand)))),
+             
+             selectInput("shade_type",
+                         label = "Shade Color Composition", 
+                         choices = colnames(shades_values)[6:9],
+                         selected = colnames(shades_values)[6])
+           )
+        ),
+    
+    column(8,
+           wellPanel(
+             tabsetPanel(id = "info_tabs",
+                         type = "tabs",
+                         # Static background tab
+                         tabPanel("Background", 
+                                  includeHTML(here::here("Text", "background_text.html"))),
+                         
+                         # tabs to dynamically appear
+                         tabPanel(title = "Hue Information",
+                                  value = 1,
+                                  includeHTML(here::here("Text", "hue.html"))),
+                         tabPanel(title = "Saturation Information",
+                                  value = 2,
+                                  includeHTML(here::here("Text", "saturation.html"))),
+                         tabPanel(title = "Brightness Information",
+                                  value = 3,
+                                  includeHTML(here::here("Text", "brightness.html"))),
+                         tabPanel(title = "Lightness Information",
+                                  value = 4,
+                                  includeHTML(here::here("Text", "lightness.html"))),
+                         tabPanel(title = "Foundation Shade",
+                                  value = 5,
+                                  htmlOutput("info_plot_click")))
+           )
+          )
   )
 )
+  
 
 # Shiny App Server
 server <- function(input, output, session) {
@@ -137,16 +147,16 @@ server <- function(input, output, session) {
           tags$b("Product: "), br(),
           tags$b("Hexadecimal: "), br(),
           tags$b("Hue: "), br(),
-          tags$b("Saturation: "), br(),
           tags$b("Brightness: "), br(),
-          tags$b("Lightness: ")) }
+          tags$b("Saturation: "), br(),
+          tags$b("Lightness: "), br()) }
       else if(nrow(clicked_df) >= 1){
         p(tags$b("Brand: "), tags$em(clicked_df$brand), br(),
           tags$b("Product: "), tags$em(clicked_df$product), br(),
           tags$b("Hexadecimal: "), tags$em(clicked_df$hex), br(),
           tags$b("Hue: "), tags$em(clicked_df$Hue), br(),
-          tags$b("Saturation: "), tags$em(clicked_df$Saturation), br(),
           tags$b("Brightness: "), tags$em(clicked_df$Brightness), br(),
+          tags$b("Saturation: "), tags$em(clicked_df$Saturation), br(),
           tags$b("Lightness: "), tags$em(clicked_df$Lightness))
       }
       else { NA }
